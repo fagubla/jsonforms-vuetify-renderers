@@ -18,6 +18,7 @@
       :error-messages="control.errors"
       :indeterminate="control.data === undefined"
       :value="control.data"
+      :input-value="control.data"
       @change="onChange"
       @focus="isFocused = true"
       @blur="isFocused = false"
@@ -51,6 +52,7 @@ const controlRenderer = defineComponent({
   props: {
     ...rendererProps<ControlElement>(),
   },
+  mounted() {},
   setup(props: RendererProps<ControlElement>) {
     return useVuetifyControl(
       useJsonFormsControl(props),

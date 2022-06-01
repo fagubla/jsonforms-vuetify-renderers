@@ -1,16 +1,39 @@
 import {
   composePaths,
   computeLabel,
+  ControlElement,
   getFirstPrimitiveProp,
   isDescriptionHidden,
   JsonFormsSubStates,
   Resolve,
+  Dispatch,
+  CoreActions,
+  update,
+  moveUp,
+  moveDown,
 } from '@jsonforms/core';
+import { RendererProps } from '@jsonforms/vue2';
 import cloneDeep from 'lodash/cloneDeep';
 import merge from 'lodash/merge';
 import { useStyles } from '../styles';
-import { computed, ComputedRef, inject, ref } from '../vue';
+import {
+  computed,
+  ComputedRef,
+  inject,
+  ref,
+  onBeforeMount,
+  onMounted,
+  onBeforeUpdate,
+  onUpdated,
+  onBeforeUnmount,
+  onUnmounted,
+  onActivated,
+  onDeactivated,
+  onErrorCaptured,
+} from '../vue';
+import Vue from 'vue';
 import Ajv from 'ajv';
+import _ from 'lodash';
 
 const useControlAppliedOptions = <I extends { control: any }>(input: I) => {
   return computed(() =>
@@ -42,13 +65,16 @@ export const useVuetifyControl = <
   I extends { control: any; handleChange: any }
 >(
   input: I,
-  adaptValue: (target: any) => any = (v) => v
+  adaptValue: (target: any, options: any) => any = (v) => v
 ) => {
   const appliedOptions = useControlAppliedOptions(input);
 
   const isFocused = ref(false);
   const onChange = (value: any) => {
-    input.handleChange(input.control.value.path, adaptValue(value));
+    input.handleChange(
+      input.control.value.path,
+      adaptValue(value, appliedOptions)
+    );
   };
 
   const persistentHint = (): boolean => {
@@ -192,3 +218,196 @@ export const useAjv = () => {
   // should always exist
   return jsonforms.core?.ajv as Ajv;
 };
+
+/**
+ * Adds styles, isFocused, appliedOptions and onChange
+ */
+export const useVuetifyControlExt = <
+  I extends { control: any; handleChange: any }
+>(
+  props: RendererProps<ControlElement> | any,
+  input: I,
+  adaptValue: (target: any) => any = (v) => v
+) => {
+  const appliedOptions = useControlAppliedOptions(input);
+
+  const isFocused = ref(false);
+  const onChange = (value: any) => {
+    input.handleChange(input.control.value.path, adaptValue(value));
+  };
+
+  const persistentHint = (): boolean => {
+    return !isDescriptionHidden(
+      input.control.value.visible,
+      input.control.value.description,
+      isFocused.value,
+      !!appliedOptions.value?.showUnfocusedDescription
+    );
+  };
+
+  const computedLabel = useComputedLabel(input, appliedOptions);
+
+  const controlWrapper = computed(() => {
+    const { id, description, errors, label, visible, required } =
+      input.control.value;
+    return { id, description, errors, label, visible, required };
+  });
+
+  const styles = useStyles(input.control.value.uischema);
+
+  // Extension for dependents fields
+  const indexc = pathControlSchema(props.uischema.scope);
+  const JForm = inject<any>('JForm');
+  const store = inject<any>('store');
+  const JReactivex = inject<any>('JReactivex');
+
+  // CREATE FUNCTION
+  let fnOnchange = new Function();
+  if (
+    props.uischema.options &&
+    props.uischema.options.events &&
+    props.uischema.options.events.onChange
+  ) {
+    fnOnchange = new Function(
+      props.uischema.options.events.onChange.arguments,
+      props.uischema.options.events.onChange.body
+    );
+  }
+  // CREATE FUNCTION DEEPCHANGE
+  let deepChange = new Function();
+  if (
+    props.uischema.options &&
+    props.uischema.options.events &&
+    props.uischema.options.events.deepChange
+  ) {
+    deepChange = new Function(
+      props.uischema.options.events.deepChange.arguments,
+      props.uischema.options.events.deepChange.body
+    );
+  }
+  //Watch own value
+  const unwatch = store.watch(
+    (_state: any, getters: any) => {
+      return getters['app/getDataModel'](indexc);
+    },
+    (n: string, o: string) => {
+      JReactivex.emit(indexc, n);
+      Vue.nextTick(() => {
+        fnOnchange(JForm, n, o);
+      });
+    }
+  );
+
+  const dependencies = _.map(
+    props.uischema.rule && props.uischema.rule.condition.conditions
+      ? props.uischema.rule.condition.conditions
+      : [],
+    (e) => pathControlSchema(e.scope)
+  );
+  JReactivex.joinFork(
+    dependencies,
+    (payload: any) => {
+      deepChange(_, payload).then((res: any) => {
+        const newArray = res || [];
+        Vue.nextTick(() => {
+          JForm.setItems(indexc, newArray);
+        });
+      });
+    },
+    indexc
+  );
+
+  onBeforeMount(() => {});
+  onMounted(() => {});
+  onBeforeUpdate(() => {});
+  onUpdated(() => {});
+  onBeforeUnmount(() => {});
+  onUnmounted(() => {
+    unwatch();
+  });
+  onActivated(() => {});
+  onDeactivated(() => {
+    unwatch();
+  });
+  onErrorCaptured(() => {});
+  return {
+    ...input,
+    styles,
+    isFocused,
+    appliedOptions,
+    controlWrapper,
+    onChange,
+    persistentHint,
+    computedLabel,
+  };
+};
+
+const pathControlSchema = (input: string): string => {
+  return input.split('/').pop() || '';
+};
+
+export interface DispatchPropsOfArrayControlEx {
+  addItem(path: string, value: any): () => void;
+  removeItems?(path: string, toDelete: number[]): () => void;
+  updateItem?(path: string, toUpdate: number, value: any): () => void;
+  moveUp?(path: string, toMove: number): () => void;
+  moveDown?(path: string, toMove: number): () => void;
+}
+
+/**
+ * Maps state to dispatch properties of an array control.
+ *
+ * @param dispatch the store's dispatch method
+ * @returns {DispatchPropsOfArrayControl} dispatch props of an array control
+ */
+export const mapDispatchToArrayControlPropsEx = (
+  dispatch: Dispatch<CoreActions>
+): DispatchPropsOfArrayControlEx => ({
+  addItem: (path: string, value: any) => () => {
+    dispatch(
+      update(path, (array) => {
+        if (array === undefined || array === null) {
+          return [value];
+        }
+
+        array.push(value);
+        return array;
+      })
+    );
+  },
+  removeItems: (path: string, toDelete: number[]) => () => {
+    dispatch(
+      update(path, (array) => {
+        toDelete
+          .sort()
+          .reverse()
+          .forEach((s) => array.splice(s, 1));
+        return array;
+      })
+    );
+  },
+  updateItem: (path: string, toUpdate: number, value: any) => () => {
+    dispatch(
+      update(path, (array) => {
+        array[toUpdate] = value;
+        return array;
+      })
+    );
+  },
+  moveUp: (path, toMove: number) => () => {
+    dispatch(
+      update(path, (array) => {
+        moveUp(array, toMove);
+        return array;
+      })
+    );
+  },
+  moveDown: (path, toMove: number) => () => {
+    dispatch(
+      update(path, (array) => {
+        moveDown(array, toMove);
+        return array;
+      })
+    );
+  },
+});

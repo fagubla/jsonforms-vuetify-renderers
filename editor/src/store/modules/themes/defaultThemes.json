@@ -1,0 +1,77 @@
+[
+  {
+    "name": "Default",
+    "light": {
+      "primary": "#1976D2",
+      "secondary": "#424242",
+      "accent": "#82B1FF",
+      "error": "#FF5252",
+      "info": "#2196F3",
+      "success": "#4CAF50",
+      "warning": "#FB8C00"
+    },
+    "fontFamily": "Roboto"
+  },
+  {
+    "name": "Basil",
+    "light": {
+      "primary": "#356859",
+      "secondary": "#FD5523",
+      "accent": "#37966F",
+      "info": "#356859"
+    },
+    "fontFamily": "Comic Neue"
+  },
+  {
+    "name": "Crane",
+    "light": {
+      "primary": "#5D1049",
+      "secondary": "#E30425",
+      "accent": "#4E0D3A",
+      "info": "#5D1049"
+    },
+    "fontFamily": "Fira Code"
+  },
+  {
+    "name": "Fortnightly",
+    "light": {
+      "primary": "#6B38FB",
+      "secondary": "#6B38FB",
+      "info": "#6B38FB"
+    },
+    "fontFamily": "Inconsolata"
+  },
+  {
+    "name": "Owl",
+    "light": {
+      "primary": "#FFDE03",
+      "secondary": "#0336FF",
+      "accent": "#FF0266",
+      "info": "#FFDE03"
+    },
+    "fontFamily": "Oxygen"
+  },
+  {
+    "name": "Shrine",
+    "light": {
+      "primary": "#FEDBD0",
+      "secondary": "#FEEAE6",
+      "accent": "#442C2E",
+      "info": "#FEDBD0"
+    },
+    "fontFamily": "Tapestry"
+  },
+  {
+    "name": "admin",
+    "light": {
+      "primary": "#32c787",
+      "secondary": "#868e96",
+      "accent": "#2196f3",
+      "error": "#ff6b68",
+      "info": "#03a9f4",
+      "success": "#32c787",
+      "warning": "#ffc721"
+    },
+    "fontFamily": "Tapestry"
+  }
+]

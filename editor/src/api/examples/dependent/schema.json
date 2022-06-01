@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "title": "Dynaform",
+  "properties": {
+    "countries": {
+      "type": "object",
+      "description": "",
+      "i18n": "countries"
+    },
+    "subdivision": {
+      "type": "object",
+      "description": "",
+      "i18n": "subdivision"
+    },
+    "location": {
+      "type": "string",
+      "description": "",
+      "i18n": "location"
+    }
+  }
+}

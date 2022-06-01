@@ -37,6 +37,16 @@ import { input as verticalLayout } from './vertical-layout';
 import { input as huge } from './huge';
 import { input as ifThenElse } from './if-then-else';
 
+import { input as ruleMultiple } from './rule-multiple';
+import { input as suggest } from './suggest';
+import { input as multipleFile } from './multiple-file';
+import { input as grid } from './grid';
+import { input as dataTable } from './dataTable';
+import { input as variables } from './variables';
+import { input as subForm } from './sub-form';
+import { input as dependent } from './dependent';
+import { input as htmlViewer } from './html-viewer';
+
 export const examples = [
   {
     id: 'main',
@@ -144,6 +154,11 @@ export const examples = [
     input: rule,
   },
   {
+    id: 'rule-multiple',
+    title: 'rule multiple',
+    input: ruleMultiple,
+  },
+  {
     id: 'login',
     title: 'Login',
     input: login,
@@ -227,5 +242,45 @@ export const examples = [
     id: 'huge',
     title: 'Huge',
     input: huge,
+  },
+  {
+    id: 'suggest',
+    title: 'Suggest',
+    input: suggest,
+  },
+  {
+    id: 'multiple-file',
+    title: 'Multiple File',
+    input: multipleFile,
+  },
+  {
+    id: 'grid',
+    title: 'Grid',
+    input: grid,
+  },
+  {
+    id: 'dataTable',
+    title: 'Data Table',
+    input: dataTable,
+  },
+  {
+    id: 'variables',
+    title: 'Variables',
+    input: variables,
+  },
+  {
+    id: 'sub-form',
+    title: 'Sub Form',
+    input: subForm,
+  },
+  {
+    id: 'dependent',
+    title: 'Dependent Field',
+    input: dependent,
+  },
+  {
+    id: 'htmlViewer',
+    title: 'HTML Viewer',
+    input: htmlViewer,
   },
 ];
